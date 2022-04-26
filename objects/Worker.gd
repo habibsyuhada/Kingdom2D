@@ -33,6 +33,16 @@ func idle():
 		else:
 			var direction = path[cur_path_idx] - position
 			velocity = direction.normalized() * 25
+			if abs(velocity.x) > abs(velocity.y):
+				if velocity.x > 0 :
+					$AnimatedSprite.animation = "Walk_Right"
+				else:
+					$AnimatedSprite.animation = "Walk_Left"
+			else:
+				if velocity.y > 0 :
+					$AnimatedSprite.animation = "Walk_Down"
+				else:
+					$AnimatedSprite.animation = "Walk_Up"
 			move_and_slide(velocity)
 	else:
 		var radius = 64
