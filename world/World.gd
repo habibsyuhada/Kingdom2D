@@ -9,12 +9,8 @@ onready var astar_tilemap = get_node_or_null("/root/World/Navigation2D/Astar_Til
 func _ready():
 	var tilemap = $Navigation2D/TileMap
 	var tileset = tilemap.tile_set
-	#for tile in tileset.get_tiles_ids():
-		#print(tile)
-	#print("WORLD")
+	Global.refresh_resource_timer_start(true)
 	
-	#var tilemap_size = tilemap.get_used_rect()
-	#astar_tilemap.map_size = tilemap_size.end
 	if astar_tilemap :
 		for tile in tilemap.get_used_cells():
 			if tilemap.get_cell(tile.x, tile.y) in [7, 8, 9] :
@@ -38,6 +34,7 @@ func _ready():
 					var id_astar = astar_tilemap.astar_node.get_closest_point(Vector3(tile.x, tile.y, 0.0))
 					astar_tilemap.astar_node.set_point_weight_scale(id_astar, 1.3)
 		astar_tilemap.astar_defined_point_obstacles()
+		Global.is_ai_process = true
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

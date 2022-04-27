@@ -16,6 +16,7 @@ config/icon="res://icon.png"
 
 [autoload]
 
+StateAI="*res://globals/State.gd"
 Global="*res://globals/Global.tscn"
 Gui="*res://GUI/GUI.tscn"
 

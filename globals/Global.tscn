@@ -6,3 +6,8 @@
 [node name="Global" type="Node"]
 script = ExtResource( 1 )
 Worker_Instance = ExtResource( 2 )
+
+[node name="refresh_resource_timer" type="Timer" parent="."]
+wait_time = 10.0
+
+[connection signal="timeout" from="refresh_resource_timer" to="." method="_on_refresh_resource_timer_timeout"]

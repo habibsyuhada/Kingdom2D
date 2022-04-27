@@ -6,13 +6,23 @@ var data_player = {
 	"food": 0,
 	"stone": 0,
 	"wood": 0,
-	"max_storage": 100,
+	"max_storage": 10,
+	"gather_wood": [],
 }
+var is_ai_process = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	randomize()
 
+func _physics_process(delta):
+	if is_ai_process == true:
+		ai_process()
+		
+func ai_process():
+	for body in get_tree().get_nodes_in_group("Worker"):
+		if body.state == StateAI.IDLE:
+			body.change_state(StateAI.CUT_TREE)
 
 func add_people(object_target):
 	var people_container = get_node_or_null("/root/World/Map/People")
@@ -26,3 +36,14 @@ func waits(s):
 	t.start(s)
 	yield(t, "timeout")
 	t.queue_free()
+
+
+func refresh_resource_timer_start(status):
+	if status == true :
+		$refresh_resource_timer.start()
+	else:
+		$refresh_resource_timer.stop()
+
+func _on_refresh_resource_timer_timeout():
+	get_tree().call_group("Tree", "increase_resource")
+

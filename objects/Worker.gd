@@ -4,8 +4,7 @@ extends KinematicBody2D
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
-enum {IDLE, CUT_TREE}
-var state: int = IDLE
+var state: int = StateAI.IDLE
 var velocity = Vector2.ZERO
 var speed = 25
 
@@ -31,9 +30,9 @@ func _ready():
 func _physics_process(delta):
 	velocity = Vector2.ZERO
 	match state:
-		IDLE:
+		StateAI.IDLE:
 			idle()
-		CUT_TREE:
+		StateAI.CUT_TREE:
 			cut_tree()
 	move_navigation()
 	
@@ -57,29 +56,19 @@ func move_navigation():
 			
 			if abs(velocity.x) > abs(velocity.y):
 				if velocity.x > 0 :
-					$AnimatedSprite.animation = "Walk_Right"
+					dir_animation = "Right"
 				else:
-					$AnimatedSprite.animation = "Walk_Left"
+					dir_animation = "Left"
 			else:
 				if velocity.y > 0 :
-					$AnimatedSprite.animation = "Walk_Down"
+					dir_animation = "Down"
 				else:
-					$AnimatedSprite.animation = "Walk_Up"
+					dir_animation = "Up"
 			if velocity != Vector2.ZERO:
-				pass
+				$AnimatedSprite.animation = str("Walk_", dir_animation)
 			move_and_slide(velocity)
 
-func choose_action():
-	if !iswaiting:
-		iswaiting = true
-		yield(Global.waits(5), "completed")
-		if Global.data_player["wood"] < Global.data_player["max_storage"] and detected["tree"].size() > 0:
-			state = CUT_TREE
-			pass
-		iswaiting = false
-
 func idle():
-	choose_action()
 	if path.size() == 0:
 		var radius = 64
 		var target_pos = Vector2(rand_range(-radius, radius), rand_range(-radius, radius))
@@ -102,10 +91,14 @@ func cut_tree():
 						if area.is_in_group("Building") and area.is_in_group("Storage"):
 							selected_tree = area
 					if selected_tree:
-						for item in inventory:
-							if item == "wood":
-								pass
-						inventory.erase("wood")
+						if !isinaction:
+							isinaction = true
+							var total_decres = inventory.count("wood")
+							for i in total_decres:
+								if Global.data_player["wood"] < Global.data_player["max_storage"]:
+									inventory.erase("wood")
+									Global.data_player["wood"] += 1
+							isinaction = false
 				else:
 					path = nav.get_astar_path(position, target_node.position)
 	else:
@@ -113,20 +106,38 @@ func cut_tree():
 			var selected_tree = null
 			for area in $Body.get_overlapping_areas():
 				if area.is_in_group("Tree"):
-					if selected_tree == null or (position - selected_tree).length() > (position - area).length():
-						selected_tree = area
+					if area.get_current_frame() != 0:
+						if selected_tree == null or (position - selected_tree).length() > (position - area).length():
+							selected_tree = area
 			if selected_tree:
 				if !isinaction:
 					isinaction = true
-					$AnimatedSprite.animation = "Att_Up"
+					$AnimatedSprite.animation = str("Att_", dir_animation)
 					yield(Global.waits(2), "completed")
 					if inventory.size() < max_inventory:
 						inventory.push_back("wood")
+						selected_tree.decrease_resource()
 					isinaction = false
 			elif detected["tree"].size() > 0:
-				var target_pos = detected["tree"][0].position
-				path = nav.get_astar_path(position, target_pos)
+				var i = 0
+				var target_pos = null
+				while target_pos == null and detected["tree"].size() > i:
+					if detected["tree"][i].get_current_frame() != 0:
+						if rand_range(1,100) > 50:
+							target_pos = detected["tree"][i].position
+					i += 1
+				if target_pos:
+					path = nav.get_astar_path(position, target_pos)
+				else:
+					idle()
 
+func change_state(state_target):
+	if !iswaiting:
+		iswaiting = true
+		print(rand_range(1,10))
+		yield(Global.waits(rand_range(1,10)), "completed")
+		state = state_target
+		iswaiting = false
 
 func _on_Sight_area_entered(area):
 	if area.is_in_group("Tree"):
