@@ -38,7 +38,7 @@ animations = [ {
 [sub_resource type="RectangleShape2D" id=8]
 extents = Vector2( 14, 14 )
 
-[node name="Keep" type="Area2D"]
+[node name="Keep" type="Area2D" groups=["Building", "Storage"]]
 script = ExtResource( 2 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]

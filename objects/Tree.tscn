@@ -35,6 +35,10 @@ script = ExtResource( 2 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
 frames = SubResource( 7 )
+frame = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
 shape = SubResource( 8 )
+
+[connection signal="area_entered" from="." to="." method="_on_Tree_area_entered"]
