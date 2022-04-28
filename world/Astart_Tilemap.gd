@@ -2,7 +2,7 @@ extends TileMap
 
 const BASE_LINE_WIDTH = 3.0
 const DRAW_COLOR = Color.white
-onready var ori_tilemap = get_node_or_null("/root/World/Navigation2D/TileMap")
+var ori_tilemap = null
 
 # The Tilemap node doesn't have clear bounds so we're defining the map's limits here.
 export(Vector2) var map_size = Vector2.ONE * 16
@@ -22,6 +22,7 @@ onready var obstacles = get_used_cells_by_id(0)
 onready var _half_cell_size = cell_size / 2
 
 func _ready():
+	ori_tilemap = Global.world_tile
 	map_size = ori_tilemap.get_used_rect().end
 	astar_defined_point_obstacles()
 	#var walkable_cells_list = astar_add_walkable_cells(obstacles)
