@@ -10,6 +10,6 @@ Worker_Instance = ExtResource( 2 )
 Wheat_Field_Instance = ExtResource( 3 )
 
 [node name="refresh_resource_timer" type="Timer" parent="."]
-wait_time = 10.0
+wait_time = 30.0
 
 [connection signal="timeout" from="refresh_resource_timer" to="." method="_on_refresh_resource_timer_timeout"]

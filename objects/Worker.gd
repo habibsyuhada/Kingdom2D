@@ -90,64 +90,68 @@ func idle():
 		var target_pos = Vector2(rand_range(-radius, radius), rand_range(-radius, radius))
 		target_pos = position + target_pos
 		path = nav.get_astar_path(position, target_pos)
+		change_state(AI_Core.IDLE)
 
 func cut_tree():
-	if inventory.size() == max_inventory:
-		if path.size() == 0:
-			var target_node = null
-			for body in get_tree().get_nodes_in_group("Building"):
-				if body.is_in_group("Storage"):
-					if !target_node or (position - body.position).length() < (position - target_node.position).length():
-						target_node = body
-			if target_node:
-				if nav.world_to_map(position) == nav.world_to_map(target_node.position):
+	if AI_Core.data_ai["wood"] >= AI_Core.req_level[AI_Core.level]["wood"]:
+		change_state(AI_Core.IDLE)
+	else:
+		if inventory.size() == max_inventory:
+			if path.size() == 0:
+				var target_node = null
+				for body in get_tree().get_nodes_in_group("Building"):
+					if body.is_in_group("Storage"):
+						if !target_node or (position - body.position).length() < (position - target_node.position).length():
+							target_node = body
+				if target_node:
+					if nav.world_to_map(position) == nav.world_to_map(target_node.position):
+						var selected_tree = null
+						for area in $Body.get_overlapping_areas():
+							if area.is_in_group("Building") and area.is_in_group("Storage"):
+								selected_tree = area
+						if selected_tree:
+							if !isinaction:
+								isinaction = true
+								var total_decres = inventory.count("wood")
+								for i in total_decres:
+									if AI_Core.data_ai["wood"] < AI_Core.req_level[AI_Core.level]["wood"]:
+										AI_Core.data_ai["wood"] += 1
+								inventory.clear()
+								isinaction = false
+					else:
+						path = nav.get_astar_path(position, target_node.position)
+		else:
+			if path.size() == 0:
+				if detected["tree"].size() > 0:
 					var selected_tree = null
 					for area in $Body.get_overlapping_areas():
-						if area.is_in_group("Building") and area.is_in_group("Storage"):
-							selected_tree = area
+						if area.is_in_group("Tree"):
+							if area.get_current_frame() != 0:
+								if selected_tree == null or (position - selected_tree).length() > (position - area).length():
+									selected_tree = area
 					if selected_tree:
 						if !isinaction:
 							isinaction = true
-							var total_decres = inventory.count("wood")
-							for i in total_decres:
-								if Global.data_player["wood"] < Global.data_player["max_storage"]:
-									AI_Core.data_ai["wood"] += 1
-								inventory.clear()
+							$AnimatedSprite.animation = str("Att_", dir_animation)
+							yield(Global.waits(2), "completed")
+							if inventory.size() < max_inventory:
+								inventory.push_back("wood")
+								selected_tree.decrease_resource()
 							isinaction = false
+					elif detected["tree"].size() > 0:
+						var i = 0
+						var target_pos = null
+						while target_pos == null and detected["tree"].size() > i:
+							if detected["tree"][i].get_current_frame() != 0:
+								if rand_range(1,100) > 50:
+									target_pos = detected["tree"][i].position
+							i += 1
+						if target_pos:
+							path = nav.get_astar_path(position, target_pos)
+						else:
+							idle()
 				else:
-					path = nav.get_astar_path(position, target_node.position)
-	else:
-		if path.size() == 0:
-			if detected["tree"].size() > 0:
-				var selected_tree = null
-				for area in $Body.get_overlapping_areas():
-					if area.is_in_group("Tree"):
-						if area.get_current_frame() != 0:
-							if selected_tree == null or (position - selected_tree).length() > (position - area).length():
-								selected_tree = area
-				if selected_tree:
-					if !isinaction:
-						isinaction = true
-						$AnimatedSprite.animation = str("Att_", dir_animation)
-						yield(Global.waits(2), "completed")
-						if inventory.size() < max_inventory:
-							inventory.push_back("wood")
-							selected_tree.decrease_resource()
-						isinaction = false
-				elif detected["tree"].size() > 0:
-					var i = 0
-					var target_pos = null
-					while target_pos == null and detected["tree"].size() > i:
-						if detected["tree"][i].get_current_frame() != 0:
-							if rand_range(1,100) > 50:
-								target_pos = detected["tree"][i].position
-						i += 1
-					if target_pos:
-						path = nav.get_astar_path(position, target_pos)
-					else:
-						idle()
-			else:
-				idle()
+					idle()
 
 func build():
 	if path.size() == 0:
@@ -161,8 +165,7 @@ func build():
 					if !isinaction:
 						isinaction = true
 						$AnimatedSprite.animation = str("Att_", dir_animation)
-						yield(Global.waits(selected_building.build_time), "completed")
-						print("SELESEI BUILD")
+						yield(Global.waits(MasterData.building[selected_building.object_name]["build_time"]), "completed")
 						selected_building.worker_build = null
 						selected_building.need_build = false
 						selected_building.set_current_frame(1)
@@ -172,40 +175,66 @@ func build():
 			change_state(AI_Core.IDLE)
 
 func gather_food():
-	
-	if path.size() == 0:
-		var selected_field = null
-		for field in get_tree().get_nodes_in_group("White Field"):
-			if field.get_current_frame() == 3:
-				selected_field = field
-		if selected_field:
-			for area in $Body.get_overlapping_areas():
-				if area == selected_field:
-					if !isinaction:
-						isinaction = true
-						$AnimatedSprite.animation = str("Att_", dir_animation)
-						yield(Global.waits(2), "completed")
-						if inventory.size() < max_inventory:
-							inventory.push_back("food")
-							selected_field.decrease_resource()
-						isinaction = false
-			path = nav.get_astar_path(position, selected_field.position)
-		else:
-			change_state(AI_Core.IDLE)
+	if AI_Core.data_ai["food"] >= AI_Core.req_level[AI_Core.level]["food"]:
+		change_state(AI_Core.IDLE)
+	else:
+		if path.size() == 0:
+			if inventory.size() == max_inventory:
+				var target_node = null
+				for body in get_tree().get_nodes_in_group("Building"):
+					if body.is_in_group("Storage"):
+						if !target_node or (position - body.position).length() < (position - target_node.position).length():
+							target_node = body
+				if target_node:
+					if nav.world_to_map(position) == nav.world_to_map(target_node.position):
+						var selected_tree = null
+						for area in $Body.get_overlapping_areas():
+							if area.is_in_group("Building") and area.is_in_group("Storage"):
+								selected_tree = area
+						if selected_tree:
+							if !isinaction:
+								isinaction = true
+								var total_decres = inventory.count("food")
+								for i in total_decres:
+									if AI_Core.data_ai["food"] < AI_Core.req_level[AI_Core.level]["food"]:
+										AI_Core.data_ai["food"] += 1
+								inventory.clear()
+								isinaction = false
+					else:
+						path = nav.get_astar_path(position, target_node.position)
+			else:
+				var selected_field = null
+				for field in get_tree().get_nodes_in_group("White Field"):
+					if field.get_current_frame() == 3:
+						selected_field = field
+				if selected_field:
+					for area in $Body.get_overlapping_areas():
+						if area == selected_field:
+							if !isinaction:
+								isinaction = true
+								$AnimatedSprite.animation = str("Att_", dir_animation)
+								yield(Global.waits(2), "completed")
+								if inventory.size() < max_inventory:
+									inventory.push_back("food")
+									selected_field.decrease_resource()
+								isinaction = false
+					path = nav.get_astar_path(position, selected_field.position)
+				else:
+					change_state(AI_Core.IDLE)
 
 func change_state(state_target):
 	if !iswaiting:
 		iswaiting = true
-		yield(Global.waits(rand_range(1,3)), "completed")
-		state = state_target
-		AI_Core.data_ai["worker_cut_tree_intance"].erase(self)
-		AI_Core.data_ai["worker_gather_food_intance"].erase(self)
-		print(AI_Core.data_ai["worker_cut_tree_intance"])
-		print(AI_Core.data_ai["worker_gather_food_intance"])
-		if state == AI_Core.CUT_TREE:
-			AI_Core.data_ai["worker_cut_tree_intance"].push_back(self)
-		elif state == AI_Core.GATHER_FOOD:
-			AI_Core.data_ai["worker_gather_food_intance"].push_back(self)
+		if state_target != AI_Core.IDLE:
+			yield(Global.waits(rand_range(1,3)), "completed")
+		if !isinaction:
+			state = state_target
+			AI_Core.data_ai["worker_cut_tree_intance"].erase(self)
+			AI_Core.data_ai["worker_gather_food_intance"].erase(self)
+			if state == AI_Core.CUT_TREE:
+				AI_Core.data_ai["worker_cut_tree_intance"].push_back(self)
+			elif state == AI_Core.GATHER_FOOD:
+				AI_Core.data_ai["worker_gather_food_intance"].push_back(self)
 		iswaiting = false
 
 func _on_Sight_area_entered(area):

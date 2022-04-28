@@ -1,17 +1,18 @@
 extends Area2D
 
 
+var object_name = "wheat_field"
 var total_res = 2
 var max_res = 8
 var istouched = false
 var need_build = true
 var worker_build = null
-var build_time = 5
 
 func _ready():
 	AI_Core.data_ai["wheat_field"] += 1
 	var frames = $AnimatedSprite.frames
 	max_res = 8+randi()%4+1
+	Global.change_territory(position, MasterData.building[object_name]["territory"], 1)
 
 func increase_resource(total = 1):
 	if !need_build:

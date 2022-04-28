@@ -1,15 +1,17 @@
 extends Node2D
 
+#randi()%10+1 returns an int from 1 to 10
+#randf()*10.0+1.0 returns a float from 1.0 to 10.999999~
+#rand_range(1,11) returns a float from 1.0 to 10.999999~
+#range(1,11)[randi()%range(1,11).size()] is a little ugly and less efficient but returns an int 
+#from 1 to 10 without you having to do the math yourself (aka the 11+1 part) 
+#because all you need to do is set the range()
+
+
+
 
 export (PackedScene) var Worker_Instance
 export (PackedScene) var Wheat_Field_Instance
-var data_player = {
-	"food": 0,
-	"stone": 0,
-	"wood": 0,
-	"max_storage": 10,
-	"gather_wood": [],
-}
 onready var territory_tile = get_node_or_null("/root/World/Navigation2D/Territory")
 onready var world_tile = get_node_or_null("/root/World/Navigation2D/TileMap")
 onready var astar_tile = get_node_or_null("/root/World/Navigation2D/Astar_Tilemap")

@@ -4,7 +4,7 @@ extends Area2D
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
-var territory = 8
+var object_name = "keep"
 var need_build = false
 var worker_build = null
 
@@ -16,7 +16,8 @@ func _ready():
 	var worker2 = Global.Worker_Instance.instance()
 	worker2.position = position
 	Global.add_people(worker2)
-	Global.change_territory(position, territory, 2)
+	Global.change_territory(position, MasterData.building[object_name]["territory"], 2)
+	AI_Core.data_ai["max_people"] += MasterData.building[object_name]["max_people"]
 
 func _on_Keep_area_entered(area):
 	#print(area.get_parent())
