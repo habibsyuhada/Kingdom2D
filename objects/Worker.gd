@@ -93,7 +93,7 @@ func idle():
 		change_state(AI_Core.IDLE)
 
 func cut_tree():
-	if AI_Core.data_ai["wood"] >= AI_Core.req_level[AI_Core.level]["wood"]:
+	if AI_Core.data_ai["wood"] >= AI_Core.req_level[AI_Core.max_level_reached]["wood"]:
 		change_state(AI_Core.IDLE)
 	else:
 		if inventory.size() == max_inventory:
@@ -114,7 +114,7 @@ func cut_tree():
 								isinaction = true
 								var total_decres = inventory.count("wood")
 								for i in total_decres:
-									if AI_Core.data_ai["wood"] < AI_Core.req_level[AI_Core.level]["wood"]:
+									if AI_Core.data_ai["wood"] < AI_Core.req_level[AI_Core.max_level_reached]["wood"]:
 										AI_Core.data_ai["wood"] += 1
 								inventory.clear()
 								isinaction = false
@@ -157,7 +157,7 @@ func build():
 	if path.size() == 0:
 		var selected_building = null
 		for building in get_tree().get_nodes_in_group("Building"):
-			if building.worker_build == self:
+			if building.worker_build == self and !selected_building:
 				selected_building = building
 		if selected_building:
 			for area in $Body.get_overlapping_areas():
@@ -166,16 +166,14 @@ func build():
 						isinaction = true
 						$AnimatedSprite.animation = str("Att_", dir_animation)
 						yield(Global.waits(MasterData.building[selected_building.object_name]["build_time"]), "completed")
-						selected_building.worker_build = null
-						selected_building.need_build = false
-						selected_building.set_current_frame(1)
+						selected_building.build_complete()
 						isinaction = false
 			path = nav.get_astar_path(position, selected_building.position)
 		else:
 			change_state(AI_Core.IDLE)
 
 func gather_food():
-	if AI_Core.data_ai["food"] >= AI_Core.req_level[AI_Core.level]["food"]:
+	if AI_Core.data_ai["food"] >= AI_Core.req_level[AI_Core.max_level_reached]["food"]:
 		change_state(AI_Core.IDLE)
 	else:
 		if path.size() == 0:
@@ -196,7 +194,7 @@ func gather_food():
 								isinaction = true
 								var total_decres = inventory.count("food")
 								for i in total_decres:
-									if AI_Core.data_ai["food"] < AI_Core.req_level[AI_Core.level]["food"]:
+									if AI_Core.data_ai["food"] < AI_Core.req_level[AI_Core.max_level_reached]["food"]:
 										AI_Core.data_ai["food"] += 1
 								inventory.clear()
 								isinaction = false
@@ -205,7 +203,7 @@ func gather_food():
 			else:
 				var selected_field = null
 				for field in get_tree().get_nodes_in_group("White Field"):
-					if field.get_current_frame() == 3:
+					if field.get_current_frame() == 3 and !selected_field:
 						selected_field = field
 				if selected_field:
 					for area in $Body.get_overlapping_areas():

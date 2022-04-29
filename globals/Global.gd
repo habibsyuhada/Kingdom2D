@@ -12,6 +12,7 @@ extends Node2D
 
 export (PackedScene) var Worker_Instance
 export (PackedScene) var Wheat_Field_Instance
+export (PackedScene) var House_Instance
 onready var territory_tile = get_node_or_null("/root/World/Navigation2D/Territory")
 onready var world_tile = get_node_or_null("/root/World/Navigation2D/TileMap")
 onready var astar_tile = get_node_or_null("/root/World/Navigation2D/Astar_Tilemap")
@@ -21,12 +22,16 @@ func _ready():
 	randomize()
 
 func _physics_process(delta):
-	if Input.is_action_just_released("1"):
+	if Input.is_action_just_released("`"):
+		Engine.time_scale = 0.1
+	elif Input.is_action_just_released("1"):
 		Engine.time_scale = 1
-	if Input.is_action_just_released("2"):
+	elif Input.is_action_just_released("2"):
 		Engine.time_scale = 2
-	if Input.is_action_just_released("3"):
+	elif Input.is_action_just_released("3"):
 		Engine.time_scale = 4
+	elif Input.is_action_just_released("4"):
+		Engine.time_scale = 6
 
 func add_people(object_target):
 	var people_container = get_node_or_null("/root/World/Map/People")

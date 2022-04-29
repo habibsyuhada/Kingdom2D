@@ -9,8 +9,7 @@ var need_build = true
 var worker_build = null
 
 func _ready():
-	AI_Core.data_ai["wheat_field"] += 1
-	var frames = $AnimatedSprite.frames
+	AI_Core.data_ai[object_name] += 1
 	max_res = 8+randi()%4+1
 	Global.change_territory(position, MasterData.building[object_name]["territory"], 1)
 
@@ -38,3 +37,8 @@ func get_current_frame():
 
 func set_current_frame(idx):
 	$AnimatedSprite.frame = idx
+
+func build_complete():
+	worker_build = null
+	need_build = false
+	$AnimatedSprite.frame = 1

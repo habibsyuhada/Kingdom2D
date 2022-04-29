@@ -23,12 +23,22 @@ var building = {
 	},
 	"house":{
 		"cost":{
-			"wood": 50,
-			"food": 25,
+			"wood": 100,
+			"food": 75,
 		},
 		"territory": 2,
-		"max_people": 1,
+		"max_people": 2,
 		"max_storage": 0,
+		"build_time": 25,
+	},
+}
+
+var unit = {
+	"worker":{
+		"cost":{
+			"wood": 50,
+			"food": 75,
+		},
 		"build_time": 25,
 	},
 }
