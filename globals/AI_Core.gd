@@ -4,30 +4,26 @@ enum {IDLE, CUT_TREE, BUILD, GATHER_FOOD}
 
 var req_level = [
 	{
-		"worker_cut_tree" : 1,
-		"worker_gather_food" : 1,
-		"wood" : 50,
-		"food" : 50,
+		"wood" : 25,
+		"food" : 25,
 		"wheat_field" : 6,
-	},
-	{
-		"worker_cut_tree" : 1,
-		"worker_gather_food" : 2,
-		"wood" : 100,
-		"food" : 100,
-		"worker" : 3,
-		"house" : 1,
-	},
-	{
-		"worker_cut_tree" : 1,
-		"worker_gather_food" : 2,
-		"wood" : 200,
-		"food" : 200,
-		"worker" : 6,
-		"house" : 3,
-		"wheat_field" : 12,
+		"max_people" : 4,
 	}
 ]
+
+#for ($i=1; $i < 100; $i++) { 
+#	$value = [
+#		"wood" => 5 + ($i * 10),
+#		"food" => 5 + ($i * 8),
+#		"wheat_field" => 4 + floor($i * 0.3),
+#		"max_people" => 2 + floor($i * 1),
+#		"wheat_field" => 4 + floor($i * 0.3),
+#	];
+#	echo '<pre>';
+#	print_r($value);
+#	echo '</pre>';
+#}
+
 var level = 0
 var max_level_reached = 0
 var data_ai = {
@@ -55,21 +51,9 @@ func ai_process():
 	for req_list in req_level:
 		if level_up or no <= max_level_reached:
 			for req in req_list:
-				if req == "worker_cut_tree":
-					if req_level[max_level_reached]["wood"] > data_ai["wood"]:
-						if req_list[req] >= data_ai["worker_cut_tree_intance"].size() :
-							for body in get_tree().get_nodes_in_group("Worker"):
-								if body.state == AI_Core.IDLE and req_list[req] != data_ai["worker_cut_tree_intance"].size():
-									body.change_state(AI_Core.CUT_TREE)
-				elif req == "worker_gather_food":
-					if req_level[max_level_reached]["food"] > data_ai["food"]:
-						if req_list[req] >= data_ai["worker_gather_food_intance"].size() :
-							for body in get_tree().get_nodes_in_group("Worker"):
-								if body.state == AI_Core.IDLE and req_list[req] != data_ai["worker_gather_food_intance"].size():
-									body.change_state(AI_Core.GATHER_FOOD)
-				elif req_list[req] > data_ai[req] :
+				if req_list[req] > data_ai[req] :
 					level_up = false
-					if req == "wheat_field" or req == "house":
+					if req == "wheat_field":
 						var buyable = true
 						for cost in MasterData.building[req]["cost"]:
 							if data_ai[cost] < MasterData.building[req]["cost"][cost] :
@@ -78,25 +62,20 @@ func ai_process():
 							for cost in MasterData.building[req]["cost"]:
 								data_ai[cost] -= MasterData.building[req]["cost"][cost] 
 							yield(build_wheat_field(req), "completed")
-					elif req == "worker":
-						level_up = true
-						if data_ai["max_people"] > get_total_people():
+					elif req == "max_people":
+						var forecast_max_people = 0
+						for building in get_tree().get_nodes_in_group("Building"):
+							forecast_max_people += MasterData.building[building.object_name]["max_people"]
+						if forecast_max_people < req_list[req]:
+							var construct_building = "house"
 							var buyable = true
-							for cost in MasterData.unit[req]["cost"]:
-								if data_ai[cost] < MasterData.unit[req]["cost"][cost] :
+							for cost in MasterData.building[construct_building]["cost"]:
+								if data_ai[cost] < MasterData.building[construct_building]["cost"][cost] :
 									buyable = false
 							if buyable:
-								for cost in MasterData.unit[req]["cost"]:
-									data_ai[cost] -= MasterData.unit[req]["cost"][cost] 
-								yield(Global.waits(MasterData.unit[req]["build_time"]), "completed")
-								
-								var house_list = []
-								for building in get_tree().get_nodes_in_group("House"):
-									if !building.need_build:
-										house_list.push_back(building)
-								var worker = Global.Worker_Instance.instance()
-								worker.position = house_list[randi()%(house_list.size())].position
-								Global.add_people(worker)
+								for cost in MasterData.building[construct_building]["cost"]:
+									data_ai[cost] -= MasterData.building[construct_building]["cost"][cost] 
+								yield(build_wheat_field(construct_building), "completed")
 		if !level_up and !level_set:
 			level = no
 			if level > max_level_reached:
@@ -124,6 +103,42 @@ func ai_process():
 						select_worker.change_state(AI_Core.BUILD)
 			else:
 				building.worker_build.change_state(AI_Core.BUILD)
+				
+	if data_ai["max_people"] > get_total_people():
+		var req = "worker"
+		var buyable = true
+		for cost in MasterData.unit[req]["cost"]:
+			if data_ai[cost] < MasterData.unit[req]["cost"][cost] :
+				buyable = false
+		if buyable:
+			for cost in MasterData.unit[req]["cost"]:
+				data_ai[cost] -= MasterData.unit[req]["cost"][cost] 
+			yield(Global.waits(MasterData.unit[req]["build_time"]), "completed")
+
+			var house_list = []
+			for building in get_tree().get_nodes_in_group("House"):
+				if !building.need_build:
+					house_list.push_back(building)
+			var worker = Global.Worker_Instance.instance()
+			worker.position = house_list[randi()%(house_list.size())].position
+			Global.add_people(worker)
+	
+	var division = []
+	if req_level[max_level_reached]["wood"] > data_ai["wood"]:
+		division.push_back("wood")
+	if req_level[max_level_reached]["food"] > data_ai["food"]:
+		division.push_back("food")
+	var max_employee_division = data_ai["worker"] / division.size()
+	no = 0
+	for body in get_tree().get_nodes_in_group("Worker"):
+		if body.state == AI_Core.IDLE :
+			var min_worker_division = [data_ai["worker_cut_tree_intance"].size(), data_ai["worker_gather_food_intance"].size()].min()
+			no +=1
+			if "wood" in division and data_ai["worker_cut_tree_intance"].size() < max_employee_division and data_ai["worker_cut_tree_intance"].size() == min_worker_division :
+				body.change_state(AI_Core.CUT_TREE)
+			elif "food" in division and data_ai["worker_gather_food_intance"].size() < max_employee_division and data_ai["worker_gather_food_intance"].size() == min_worker_division :
+				body.change_state(AI_Core.GATHER_FOOD)
+
 	yield(get_tree(), "idle_frame")
 
 func build_wheat_field(req):

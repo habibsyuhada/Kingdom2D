@@ -23,8 +23,8 @@ var building = {
 	},
 	"house":{
 		"cost":{
-			"wood": 100,
-			"food": 75,
+			"wood": 10,
+			"food": 10,
 		},
 		"territory": 2,
 		"max_people": 2,
@@ -36,8 +36,8 @@ var building = {
 var unit = {
 	"worker":{
 		"cost":{
-			"wood": 50,
-			"food": 75,
+			"wood": 5,
+			"food": 5,
 		},
 		"build_time": 25,
 	},
