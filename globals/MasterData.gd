@@ -16,7 +16,7 @@ var building = {
 		"cost":{
 			"wood": 5
 		},
-		"territory": 2,
+		"territory": 4,
 		"max_people": 0,
 		"max_storage": 0,
 		"build_time": 5,
@@ -26,7 +26,27 @@ var building = {
 			"wood": 10,
 			"food": 10,
 		},
-		"territory": 2,
+		"territory": 4,
+		"max_people": 2,
+		"max_storage": 0,
+		"build_time": 25,
+	},
+	"melee_barrack":{
+		"cost":{
+			"wood": 20,
+			"food": 20,
+		},
+		"territory": 4,
+		"max_people": 2,
+		"max_storage": 0,
+		"build_time": 25,
+	},
+	"ranged_barrack":{
+		"cost":{
+			"wood": 25,
+			"food": 20,
+		},
+		"territory": 4,
 		"max_people": 2,
 		"max_storage": 0,
 		"build_time": 25,
@@ -38,6 +58,13 @@ var unit = {
 		"cost":{
 			"wood": 5,
 			"food": 5,
+		},
+		"build_time": 15,
+	},
+	"swordman":{
+		"cost":{
+			"wood": 15,
+			"food": 15,
 		},
 		"build_time": 25,
 	},

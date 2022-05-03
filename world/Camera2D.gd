@@ -19,7 +19,13 @@ var cursor_tile = 16
 func _process(delta):
 	if target and target_return_enabled and events.size() == 0:
 		position = lerp(position, get_node(target).position, target_return_rate)
-
+	
+	if Input.is_action_just_pressed("Q"):
+		var new_zoom = clamp((zoom.x + -0.5), min_zoom, max_zoom)
+		zoom = Vector2.ONE * new_zoom
+	if Input.is_action_just_pressed("E"):
+		var new_zoom = clamp((zoom.x + 0.5), min_zoom, max_zoom)
+		zoom = Vector2.ONE * new_zoom
 
 func _unhandled_input(event):
 	detect_input(event)

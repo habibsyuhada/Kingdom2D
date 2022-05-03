@@ -11,8 +11,10 @@ extends Node2D
 
 
 export (PackedScene) var Worker_Instance
+export (PackedScene) var Swordman_Instance
 export (PackedScene) var Wheat_Field_Instance
 export (PackedScene) var House_Instance
+export (PackedScene) var Melee_Barrack_Instance
 onready var territory_tile = get_node_or_null("/root/World/Navigation2D/Territory")
 onready var world_tile = get_node_or_null("/root/World/Navigation2D/TileMap")
 onready var astar_tile = get_node_or_null("/root/World/Navigation2D/Astar_Tilemap")

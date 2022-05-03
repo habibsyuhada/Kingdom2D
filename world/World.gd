@@ -24,7 +24,7 @@ func _ready():
 				astar_tilemap.astar_node.set_point_weight_scale(id_astar, 1.5)
 			elif tilemap.get_cell(tile.x, tile.y) in [13, 14, 15] :
 				var random = randi()%100+1
-				if random > 10:
+				if random > 50:
 					var tree = Tree_Instance.instance()
 					tree.position = tilemap.map_to_world(tile)
 					tree.position += Vector2(8, 8)

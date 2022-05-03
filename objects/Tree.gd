@@ -17,7 +17,7 @@ func _on_Tree_area_entered(area):
 func increase_resource(total = 1):
 	if total_res < max_res and !istouched:
 		var random = randi()%100+1
-		if random > 50:
+		if random < 33:
 			total_res += total
 	if $AnimatedSprite.frame == 0 and total_res > minimal_total_res_to_transform:
 		var frames = $AnimatedSprite.frames

@@ -39,6 +39,8 @@ func _physics_process(delta):
 			build()
 		AI_Core.GATHER_FOOD:
 			gather_food()
+		AI_Core.TRAIN:
+			train()
 	move_navigation()
 	
 func move_navigation():
@@ -86,14 +88,14 @@ func move_navigation():
 
 func idle():
 	if path.size() == 0:
-		var radius = 64
+		var radius = 32
 		var target_pos = Vector2(rand_range(-radius, radius), rand_range(-radius, radius))
 		target_pos = position + target_pos
 		path = nav.get_astar_path(position, target_pos)
 		change_state(AI_Core.IDLE)
 
 func cut_tree():
-	if AI_Core.data_ai["wood"] >= AI_Core.req_level[AI_Core.max_level_reached]["wood"]:
+	if AI_Core.data_ai["wood"] >= AI_Core.req_level["wood"]:
 		change_state(AI_Core.IDLE)
 	else:
 		if inventory.size() == max_inventory:
@@ -112,11 +114,7 @@ func cut_tree():
 						if selected_tree:
 							if !isinaction:
 								isinaction = true
-								var total_decres = inventory.count("wood")
-								for i in total_decres:
-									if AI_Core.data_ai["wood"] < AI_Core.req_level[AI_Core.max_level_reached]["wood"]:
-										AI_Core.data_ai["wood"] += 1
-								inventory.clear()
+								inventory_store()
 								isinaction = false
 					else:
 						path = nav.get_astar_path(position, target_node.position)
@@ -173,7 +171,7 @@ func build():
 			change_state(AI_Core.IDLE)
 
 func gather_food():
-	if AI_Core.data_ai["food"] >= AI_Core.req_level[AI_Core.max_level_reached]["food"]:
+	if AI_Core.data_ai["food"] >= AI_Core.req_level["food"]:
 		change_state(AI_Core.IDLE)
 	else:
 		if path.size() == 0:
@@ -192,11 +190,7 @@ func gather_food():
 						if selected_tree:
 							if !isinaction:
 								isinaction = true
-								var total_decres = inventory.count("food")
-								for i in total_decres:
-									if AI_Core.data_ai["food"] < AI_Core.req_level[AI_Core.max_level_reached]["food"]:
-										AI_Core.data_ai["food"] += 1
-								inventory.clear()
+								inventory_store()
 								isinaction = false
 					else:
 						path = nav.get_astar_path(position, target_node.position)
@@ -219,6 +213,26 @@ func gather_food():
 					path = nav.get_astar_path(position, selected_field.position)
 				else:
 					change_state(AI_Core.IDLE)
+
+func train():
+	if path.size() == 0:
+		var selected_building = null
+		for building in get_tree().get_nodes_in_group("Melee Barrack"):
+			if building.worker_train == self and !selected_building:
+				selected_building = building
+		if selected_building:
+			for area in $Body.get_overlapping_areas():
+				if area == selected_building:
+					selected_building.start_training()
+					queue_free()
+			path = nav.get_astar_path(position, selected_building.position)
+		else:
+			change_state(AI_Core.IDLE)
+
+func inventory_store():
+	for item in inventory:
+		AI_Core.data_ai[item] += 1
+	inventory.clear()
 
 func change_state(state_target):
 	if !iswaiting:
@@ -246,3 +260,7 @@ func _on_Sight_area_exited(area):
 
 func _on_AnimatedSprite_animation_finished():
 	pass # Replace with function body.
+
+func _exit_tree():
+	print("ASDASDASDASD")
+	AI_Core.data_ai["worker"] -= 1
