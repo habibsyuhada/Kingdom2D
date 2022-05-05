@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://assets/Buildings/Red/RedKeep.png" type="Texture" id=1]
 [ext_resource path="res://objects/Keep.gd" type="Script" id=2]
+[ext_resource path="res://assets/Buildings/Cyan/CyanKeep.png" type="Texture" id=3]
 
 [sub_resource type="AtlasTexture" id=1]
 atlas = ExtResource( 1 )
@@ -27,22 +28,52 @@ region = Rect2( 32, 32, 32, 32 )
 atlas = ExtResource( 1 )
 region = Rect2( 64, 32, 32, 32 )
 
+[sub_resource type="AtlasTexture" id=9]
+atlas = ExtResource( 3 )
+region = Rect2( 0, 0, 32, 32 )
+
+[sub_resource type="AtlasTexture" id=10]
+atlas = ExtResource( 3 )
+region = Rect2( 32, 0, 32, 32 )
+
+[sub_resource type="AtlasTexture" id=11]
+atlas = ExtResource( 3 )
+region = Rect2( 64, 0, 32, 32 )
+
+[sub_resource type="AtlasTexture" id=12]
+atlas = ExtResource( 3 )
+region = Rect2( 0, 32, 32, 32 )
+
+[sub_resource type="AtlasTexture" id=13]
+atlas = ExtResource( 3 )
+region = Rect2( 32, 32, 32, 32 )
+
+[sub_resource type="AtlasTexture" id=14]
+atlas = ExtResource( 3 )
+region = Rect2( 64, 32, 32, 32 )
+
 [sub_resource type="SpriteFrames" id=7]
 animations = [ {
 "frames": [ SubResource( 1 ), SubResource( 2 ), SubResource( 3 ), SubResource( 4 ), SubResource( 5 ), SubResource( 6 ) ],
 "loop": true,
-"name": "default",
+"name": "Team Red",
 "speed": 0.0
+}, {
+"frames": [ SubResource( 9 ), SubResource( 10 ), SubResource( 11 ), SubResource( 12 ), SubResource( 13 ), SubResource( 14 ) ],
+"loop": true,
+"name": "Team Cyan",
+"speed": 5.0
 } ]
 
 [sub_resource type="RectangleShape2D" id=8]
 extents = Vector2( 14, 14 )
 
-[node name="Keep" type="Area2D" groups=["Building", "Storage"]]
+[node name="Keep" type="Area2D" groups=["Buildings"]]
 script = ExtResource( 2 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
 frames = SubResource( 7 )
+animation = "Team Red"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 8 )

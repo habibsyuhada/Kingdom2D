@@ -11,7 +11,7 @@ func _ready():
 	max_res = 4+randi()%4+1
 
 func _on_Tree_area_entered(area):
-	if area.is_in_group("Building"):
+	if area.is_in_group("Buildings"):
 		queue_free()
 
 func increase_resource(total = 1):

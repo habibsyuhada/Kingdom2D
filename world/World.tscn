@@ -272,6 +272,20 @@ polygons = [ PoolIntArray( 0, 1, 2, 3 ) ]
 0/shape_one_way_margin = 0.0
 0/shapes = [  ]
 0/z_index = 0
+1/name = "Highlighted-Boxes.png 1"
+1/texture = ExtResource( 11 )
+1/tex_offset = Vector2( 0, 0 )
+1/modulate = Color( 1, 1, 1, 1 )
+1/region = Rect2( 32, 0, 16, 16 )
+1/tile_mode = 0
+1/occluder_offset = Vector2( 0, 0 )
+1/navigation_offset = Vector2( 0, 0 )
+1/shape_offset = Vector2( 0, 0 )
+1/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+1/shape_one_way = false
+1/shape_one_way_margin = 0.0
+1/shapes = [  ]
+1/z_index = 0
 
 [node name="World" type="Node2D"]
 script = ExtResource( 8 )
@@ -314,3 +328,7 @@ z_index = 99
 
 [node name="Keep" parent="Map/Building" instance=ExtResource( 5 )]
 position = Vector2( 304, 240 )
+
+[node name="Keep2" parent="Map/Building" instance=ExtResource( 5 )]
+position = Vector2( 1056, 424 )
+team = "Red"

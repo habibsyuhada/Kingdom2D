@@ -7,11 +7,14 @@ var max_res = 8
 var istouched = false
 var need_build = true
 var worker_build = null
+var team = null
 
 func _ready():
-	AI_Core.data_ai[object_name] += 1
+	AI_Core.data_ai[team][object_name] += 1
+	add_to_group("White Field " + team)
+	add_to_group("Building " + team)
 	max_res = 8+randi()%4+1
-	Global.change_territory(position, MasterData.building[object_name]["territory"], 1)
+	Global.change_territory(position, MasterData.building[object_name]["territory"], 1, team)
 
 func increase_resource(total = 1):
 	if !need_build:

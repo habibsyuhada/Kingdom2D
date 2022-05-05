@@ -7,6 +7,7 @@ extends KinematicBody2D
 var state: int = AI_Core.IDLE
 var velocity = Vector2.ZERO
 var speed = 25
+var team = null
 
 var nav = null
 var path = []
@@ -23,7 +24,8 @@ var max_inventory = 4
 var dir_animation = ""
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	AI_Core.data_ai["worker"] += 1
+	add_to_group("Worker " + team)
+	AI_Core.data_ai[team]["worker"] += 1
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -83,7 +85,7 @@ func move_navigation():
 				else:
 					dir_animation = "Up"
 			if velocity != Vector2.ZERO:
-				$AnimatedSprite.animation = str("Walk_", dir_animation)
+				$AnimatedSprite.animation = str(team + "_Walk_" + dir_animation)
 			move_and_slide(velocity)
 
 func idle():
@@ -95,21 +97,21 @@ func idle():
 		change_state(AI_Core.IDLE)
 
 func cut_tree():
-	if AI_Core.data_ai["wood"] >= AI_Core.req_level["wood"]:
+	if AI_Core.data_ai[team]["wood"] >= AI_Core.req_level[team]["wood"]:
 		change_state(AI_Core.IDLE)
 	else:
 		if inventory.size() == max_inventory:
 			if path.size() == 0:
 				var target_node = null
-				for body in get_tree().get_nodes_in_group("Building"):
-					if body.is_in_group("Storage"):
+				for body in get_tree().get_nodes_in_group("Building " + team):
+					if body.is_in_group("Storage " + team):
 						if !target_node or (position - body.position).length() < (position - target_node.position).length():
 							target_node = body
 				if target_node:
 					if nav.world_to_map(position) == nav.world_to_map(target_node.position):
 						var selected_tree = null
 						for area in $Body.get_overlapping_areas():
-							if area.is_in_group("Building") and area.is_in_group("Storage"):
+							if area.is_in_group("Building " + team) and area.is_in_group("Storage " + team):
 								selected_tree = area
 						if selected_tree:
 							if !isinaction:
@@ -130,7 +132,7 @@ func cut_tree():
 					if selected_tree:
 						if !isinaction:
 							isinaction = true
-							$AnimatedSprite.animation = str("Att_", dir_animation)
+							$AnimatedSprite.animation = str(team + "_Att_" + dir_animation)
 							yield(Global.waits(2), "completed")
 							if inventory.size() < max_inventory:
 								inventory.push_back("wood")
@@ -154,7 +156,7 @@ func cut_tree():
 func build():
 	if path.size() == 0:
 		var selected_building = null
-		for building in get_tree().get_nodes_in_group("Building"):
+		for building in get_tree().get_nodes_in_group("Building " + team):
 			if building.worker_build == self and !selected_building:
 				selected_building = building
 		if selected_building:
@@ -162,7 +164,7 @@ func build():
 				if area == selected_building:
 					if !isinaction:
 						isinaction = true
-						$AnimatedSprite.animation = str("Att_", dir_animation)
+						$AnimatedSprite.animation = str(team + "_Att_" + dir_animation)
 						yield(Global.waits(MasterData.building[selected_building.object_name]["build_time"]), "completed")
 						selected_building.build_complete()
 						isinaction = false
@@ -171,21 +173,21 @@ func build():
 			change_state(AI_Core.IDLE)
 
 func gather_food():
-	if AI_Core.data_ai["food"] >= AI_Core.req_level["food"]:
+	if AI_Core.data_ai[team]["food"] >= AI_Core.req_level[team]["food"]:
 		change_state(AI_Core.IDLE)
 	else:
 		if path.size() == 0:
 			if inventory.size() == max_inventory:
 				var target_node = null
-				for body in get_tree().get_nodes_in_group("Building"):
-					if body.is_in_group("Storage"):
+				for body in get_tree().get_nodes_in_group("Building " + team):
+					if body.is_in_group("Storage " + team):
 						if !target_node or (position - body.position).length() < (position - target_node.position).length():
 							target_node = body
 				if target_node:
 					if nav.world_to_map(position) == nav.world_to_map(target_node.position):
 						var selected_tree = null
 						for area in $Body.get_overlapping_areas():
-							if area.is_in_group("Building") and area.is_in_group("Storage"):
+							if area.is_in_group("Building " + team) and area.is_in_group("Storage " + team):
 								selected_tree = area
 						if selected_tree:
 							if !isinaction:
@@ -196,7 +198,7 @@ func gather_food():
 						path = nav.get_astar_path(position, target_node.position)
 			else:
 				var selected_field = null
-				for field in get_tree().get_nodes_in_group("White Field"):
+				for field in get_tree().get_nodes_in_group("White Field " + team):
 					if field.get_current_frame() == 3 and !selected_field:
 						selected_field = field
 				if selected_field:
@@ -204,7 +206,7 @@ func gather_food():
 						if area == selected_field:
 							if !isinaction:
 								isinaction = true
-								$AnimatedSprite.animation = str("Att_", dir_animation)
+								$AnimatedSprite.animation = str(team + "_Att_" + dir_animation)
 								yield(Global.waits(2), "completed")
 								if inventory.size() < max_inventory:
 									inventory.push_back("food")
@@ -231,7 +233,7 @@ func train():
 
 func inventory_store():
 	for item in inventory:
-		AI_Core.data_ai[item] += 1
+		AI_Core.data_ai[team][item] += 1
 	inventory.clear()
 
 func change_state(state_target):
@@ -241,12 +243,12 @@ func change_state(state_target):
 			yield(Global.waits(rand_range(1,3)), "completed")
 		if !isinaction:
 			state = state_target
-			AI_Core.data_ai["worker_cut_tree_intance"].erase(self)
-			AI_Core.data_ai["worker_gather_food_intance"].erase(self)
+			AI_Core.data_ai[team]["worker_cut_tree_intance"].erase(self)
+			AI_Core.data_ai[team]["worker_gather_food_intance"].erase(self)
 			if state == AI_Core.CUT_TREE:
-				AI_Core.data_ai["worker_cut_tree_intance"].push_back(self)
+				AI_Core.data_ai[team]["worker_cut_tree_intance"].push_back(self)
 			elif state == AI_Core.GATHER_FOOD:
-				AI_Core.data_ai["worker_gather_food_intance"].push_back(self)
+				AI_Core.data_ai[team]["worker_gather_food_intance"].push_back(self)
 		iswaiting = false
 
 func _on_Sight_area_entered(area):
@@ -263,4 +265,4 @@ func _on_AnimatedSprite_animation_finished():
 
 func _exit_tree():
 	print("ASDASDASDASD")
-	AI_Core.data_ai["worker"] -= 1
+	AI_Core.data_ai[team]["worker"] -= 1

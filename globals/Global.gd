@@ -18,6 +18,10 @@ export (PackedScene) var Melee_Barrack_Instance
 onready var territory_tile = get_node_or_null("/root/World/Navigation2D/Territory")
 onready var world_tile = get_node_or_null("/root/World/Navigation2D/TileMap")
 onready var astar_tile = get_node_or_null("/root/World/Navigation2D/Astar_Tilemap")
+var territory_tileset = {
+	"Red": 0,
+	"Cyan": 1,
+}
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -62,7 +66,7 @@ func refresh_resource_timer_start(status):
 func _on_refresh_resource_timer_timeout():
 	get_tree().call_group("Resource", "increase_resource")
 
-func change_territory(source_position, large, additon, force = false):
+func change_territory(source_position, large, additon, team, force = false):
 	if territory_tile:
 		var tilepos = territory_tile.world_to_map(source_position)
 		tilepos += Vector2(large, large) 
@@ -73,7 +77,7 @@ func change_territory(source_position, large, additon, force = false):
 			for x in large:
 				tile.x = tilepos.x - x
 				if force:
-					territory_tile.set_cell(tile.x, tile, 0)
+					territory_tile.set_cell(tile.x, tile, territory_tileset[team])
 				elif territory_tile.get_cell(tile.x, tile.y)  == -1 :
-					territory_tile.set_cell(tile.x, tile.y, 0)
+					territory_tile.set_cell(tile.x, tile.y, territory_tileset[team])
 			
