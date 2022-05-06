@@ -42,6 +42,9 @@ func _ready():
 					astar_tilemap.astar_node.set_point_weight_scale(id_astar, 1.3)
 		astar_tilemap.astar_defined_point_obstacles()
 		AI_Core.is_ai_process = true
+	
+	for body in get_tree().get_nodes_in_group("Swordmans"):
+		body.state = AI_Core.ATTACK_ENEMY
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

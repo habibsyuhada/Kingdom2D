@@ -1,6 +1,6 @@
 extends Node2D
 
-enum {IDLE, CUT_TREE, BUILD, GATHER_FOOD, TRAIN}
+enum {IDLE, CUT_TREE, BUILD, GATHER_FOOD, TRAIN, PATROL, ATTACK_ENEMY}
 
 var req_level = {}
 var max_level_reached = {}
@@ -21,10 +21,12 @@ func _ready():
 			"worker" : 0,
 			"swordman" : 0,
 			"max_people" : 0,
-			"worker_cut_tree_intance" : [],
-			"worker_gather_food_intance" : [],
 			"melee_barrack" : 0,
 			"ranged_barrack" : 0,
+			"worker_cut_tree_intance" : [],
+			"worker_gather_food_intance" : [],
+			"swordman_patrol" : [],
+			"swordman_war" : [],
 		}
 
 func _physics_process(delta):
@@ -147,7 +149,7 @@ func ai_process(team):
 			Global.add_people(worker)
 	
 	if data_ai[team]["worker"] > req_level[team]["worker"]:
-		for building in get_tree().get_nodes_in_group("Melee Barrack"):
+		for building in get_tree().get_nodes_in_group("Melee Barrack " + team):
 			if !building.need_build:
 				if !building.worker_train:
 					if !building.intraining:
@@ -179,6 +181,9 @@ func ai_process(team):
 				body.change_state(AI_Core.CUT_TREE)
 			elif "food" in division and data_ai[team]["worker_gather_food_intance"].size() < max_employee_division and data_ai[team]["worker_gather_food_intance"].size() == min_worker_division :
 				body.change_state(AI_Core.GATHER_FOOD)
+				
+	if (data_ai[team]["swordman"] - data_ai[team]["worker"]) > data_ai[team]["worker"]:
+		pass
 	
 	yield(get_tree(), "idle_frame")
 
@@ -224,7 +229,7 @@ func build_wheat_field(req, team):
 		
 		if req in ["house", "melee_barrack"]:
 			field_list += get_tree().get_nodes_in_group("House " + team)
-			field_list += get_tree().get_nodes_in_group("Melee Barrack")
+			field_list += get_tree().get_nodes_in_group("Melee Barrack " + team)
 		
 		var district_list = []
 		for field in field_list:

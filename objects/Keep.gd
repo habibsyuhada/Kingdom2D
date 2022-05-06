@@ -13,6 +13,7 @@ export var team = "Cyan"
 func _ready():
 	add_to_group("Building " + team)
 	add_to_group("Storage " + team)
+	add_to_group("Keep " + team)
 	var worker = Global.Worker_Instance.instance()
 	worker.team = team
 	worker.position = position

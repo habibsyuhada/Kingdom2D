@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=25 format=2]
 
 [ext_resource path="res://assets/Ground/Shore.png" type="Texture" id=1]
 [ext_resource path="res://assets/Ground/Grass.png" type="Texture" id=2]
@@ -11,6 +11,7 @@
 [ext_resource path="res://assets/Ground/obstacle.png" type="Texture" id=9]
 [ext_resource path="res://world/Astart_Tilemap.gd" type="Script" id=10]
 [ext_resource path="res://assets/User Interface/Highlighted-Boxes.png" type="Texture" id=11]
+[ext_resource path="res://objects/Swordman.tscn" type="PackedScene" id=12]
 
 [sub_resource type="NavigationPolygon" id=7]
 vertices = PoolVector2Array( 16, 16, 0, 16, 0, 0, 16, 0 )
@@ -324,11 +325,19 @@ z_index = 99
 
 [node name="People" type="Node2D" parent="Map"]
 
+[node name="Swordman" parent="Map/People" instance=ExtResource( 12 )]
+position = Vector2( 632, 520 )
+team = "Cyan"
+
+[node name="Swordman2" parent="Map/People" instance=ExtResource( 12 )]
+position = Vector2( 760, 392 )
+team = "Red"
+
 [node name="Building" type="Node2D" parent="Map"]
 
 [node name="Keep" parent="Map/Building" instance=ExtResource( 5 )]
 position = Vector2( 304, 240 )
 
 [node name="Keep2" parent="Map/Building" instance=ExtResource( 5 )]
-position = Vector2( 1056, 424 )
+position = Vector2( 1352, 592 )
 team = "Red"

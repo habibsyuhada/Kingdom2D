@@ -19,5 +19,6 @@ func build_complete():
 	worker_build = null
 	need_build = false
 	var frames = $AnimatedSprite.frames
+	$AnimatedSprite.animation = str("Team " + team)
 	$AnimatedSprite.frame = randi()%(frames.get_frame_count("Team " + team) - 1) + 1
 	AI_Core.data_ai[team]["max_people"] += MasterData.building[object_name]["max_people"]

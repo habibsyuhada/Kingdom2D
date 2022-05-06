@@ -25,6 +25,7 @@ var dir_animation = ""
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	add_to_group("Worker " + team)
+	add_to_group("Unit " + team)
 	AI_Core.data_ai[team]["worker"] += 1
 
 
@@ -157,8 +158,11 @@ func build():
 	if path.size() == 0:
 		var selected_building = null
 		for building in get_tree().get_nodes_in_group("Building " + team):
-			if building.worker_build == self and !selected_building:
-				selected_building = building
+			if building.worker_build == self:
+				if building in $Body.get_overlapping_areas():
+					selected_building = building
+				elif !selected_building :
+					selected_building = building
 		if selected_building:
 			for area in $Body.get_overlapping_areas():
 				if area == selected_building:
@@ -219,7 +223,7 @@ func gather_food():
 func train():
 	if path.size() == 0:
 		var selected_building = null
-		for building in get_tree().get_nodes_in_group("Melee Barrack"):
+		for building in get_tree().get_nodes_in_group("Melee Barrack " + team):
 			if building.worker_train == self and !selected_building:
 				selected_building = building
 		if selected_building:
@@ -264,5 +268,9 @@ func _on_AnimatedSprite_animation_finished():
 	pass # Replace with function body.
 
 func _exit_tree():
-	print("ASDASDASDASD")
 	AI_Core.data_ai[team]["worker"] -= 1
+	AI_Core.data_ai[team]["worker_cut_tree_intance"].erase(self)
+	AI_Core.data_ai[team]["worker_gather_food_intance"].erase(self)
+	for building in get_tree().get_nodes_in_group("Building " + team):
+		if building.worker_build == self:
+			building.worker_build = null
