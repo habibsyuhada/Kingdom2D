@@ -85,7 +85,7 @@ func move_navigation():
 				else:
 					dir_animation = "Up"
 			if velocity != Vector2.ZERO:
-				$AnimatedSprite.animation = str(team, "_Walk_", dir_animation)
+				$AnimationPlayer.current_animation = str(team, "_Walk_", dir_animation)
 			move_and_slide(velocity)
 
 func idle():
